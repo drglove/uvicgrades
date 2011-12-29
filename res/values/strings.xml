@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">UVicGrades</string>
+    <string name="login">Login</string>
+    <string name="password">Password</string>
+    <string name="username">NetLink ID</string>
+    <string name="login_invalid">Invalid credentials</string>
+    <string name="username_def">nlange</string>
+    <string name="password_def">Kcin164</string>
+
+</resources>
