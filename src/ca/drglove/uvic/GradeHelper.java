@@ -24,6 +24,7 @@ import org.apache.http.util.EntityUtils;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -75,7 +76,7 @@ public class GradeHelper extends Activity {
 		executeGradeRequest();
 		
 	}
-	
+
 	private void executeGradeRequest() {
 		// Login using the open HttpClient and the current context
 		try {
@@ -187,7 +188,7 @@ public class GradeHelper extends Activity {
 		//TODO: Parse HTML for grades
 		// Search through for appropriate rows
 		List<String> entries = new ArrayList<String>(5);
-		String row_expr = "<TR>\\s+<TD[^>]*>(.*?)</TR>";
+		String row_expr = "<TR>(.*?)</TR>";
 		Pattern pattern = Pattern.compile(row_expr, Pattern.DOTALL | Pattern.UNIX_LINES);
         Matcher matcher = pattern.matcher(htmlData);
         while (matcher.find())
@@ -196,14 +197,17 @@ public class GradeHelper extends Activity {
 		
         // Search each row and pick out course name, number, and grae
 		List<NameValuePair> grades = new ArrayList<NameValuePair>(5);
-		String grade_expr = "<TD[^>]*>.*?</TD>\\s+<TD[^>]*>(.*?)</TD>\\s+<TD[^>]*>(.*?)</TD>\\s+<TD[^>]*>(.*?)</TD>";
+		String noData = "<TD[^>]*>.*?</TD>\\s+";
+		String data = "<TD[^>]*>(.*?)</TD>\\s+";
+		String grade_expr = (noData) + (data + data) + (noData + noData + noData) + (data) + (noData + noData + noData + noData + noData);
         pattern = Pattern.compile(grade_expr, Pattern.DOTALL | Pattern.UNIX_LINES);
         for (String entry : entries) {
 	        matcher = pattern.matcher(entry);
-	        while (matcher.find())
+	        while (matcher.find()) {
 	        	grades.add(new BasicNameValuePair(matcher.group(1)+" "+matcher.group(2), matcher.group(3)));
+	        	Log.i(TAG, grades.get(grades.size()-1).toString());
+	        }
         }
-        Log.i(TAG,grades.toString());
         TextView t = (TextView) findViewById(R.id.textTest);
         t.setText(htmlData);
         
@@ -297,4 +301,9 @@ public class GradeHelper extends Activity {
 			client.getConnectionManager().shutdown();
 		finish();
 	}
+	
+	private TableRow addRow() {
+		return null;
+	}
+	
 }
