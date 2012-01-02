@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">UVicGrades</string>
+    <string name="app_name">UVic Grades</string>
     <string name="login">Login</string>
     <string name="password">Password</string>
     <string name="username">NetLink ID</string>
