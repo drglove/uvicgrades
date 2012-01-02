@@ -175,7 +175,6 @@ public class GradeHelper {
 	
 	// Parse the HTML for the course and grades
 	private List<NameValuePair> parseGrades(String htmlData) {
-		//TODO: Parse HTML for grades
 		// Search through for appropriate rows
 		List<String> entries = new ArrayList<String>(5);
 		String row_expr = "<TR>(.*?)</TR>";

@@ -109,7 +109,6 @@ public class GradesActivity extends Activity {
 				try {
 					updateGrades(term);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
