@@ -11,6 +11,7 @@ import android.widget.EditText;
 public class UVicGrades extends Activity implements OnClickListener {
 	
 	private static final int POST_DATA=0;
+	public static final String TAG = "UVICGRADES";
 	
 	private Button mLogin;
 	private EditText mUsername;
@@ -36,7 +37,7 @@ public class UVicGrades extends Activity implements OnClickListener {
 		extras.putString(GradeHelper.KEY_USERNAME, mUsername.getText().toString());
 		extras.putString(GradeHelper.KEY_PASSWORD, mPassword.getText().toString());
 		
-		Intent i = new Intent(this, GradeHelper.class);
+		Intent i = new Intent(this, GradesActivity.class);
 		i.putExtras(extras);
 		startActivityForResult(i, POST_DATA);
 	}

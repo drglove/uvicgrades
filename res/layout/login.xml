@@ -10,8 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/username"
-        android:inputType="text|textAutoCorrect"
-        android:text="@string/username_def" >
+        android:inputType="text|textAutoCorrect" >
 
         <requestFocus />
     </EditText>
@@ -21,8 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/password"
-        android:inputType="textPassword"
-        android:text="@string/password_def" />
+        android:inputType="textPassword" />
 
     <Button
         android:id="@+id/login"

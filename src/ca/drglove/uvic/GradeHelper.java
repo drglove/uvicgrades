@@ -21,16 +21,9 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
-import android.app.Activity;
-import android.os.Bundle;
 import android.util.Log;
-import android.widget.TableRow;
-import android.widget.TextView;
-import android.widget.Toast;
 
-public class GradeHelper extends Activity {
-
-	private static final String TAG = "UVICGRADES";
+public class GradeHelper {
 	
 	private static final String login_site = "https://www.uvic.ca/cas/login?service=https://www.uvic.ca/mypage/Login";
 	private static final String grade_referer = "https://www.uvic.ca/BAN2P/bwskogrd.P_ViewTermGrde";
@@ -38,15 +31,14 @@ public class GradeHelper extends Activity {
 	
 	public static final String KEY_USERNAME = "username";
 	public static final String KEY_PASSWORD = "password";
+	private static final String KEY_TERM = "term_in";
 	private static final String KEY_LT = "lt";
 	private static final String KEY_EVENTID = "_eventId";
 	private static final String KEY_SUBMIT = "submit";
 	private static final String KEY_LOGINCOOKIE = "uvic_sso";
-	private static final String KEY_TERM = "term_in";
 
-	private static String username;
-	private static String password;
-	private static String term;
+	private String username;
+	private String password;
 	private static final String eventid = "submit";
 	private static final String lt = "e1s1";
 	private static final String submit = "Sign in";
@@ -54,66 +46,59 @@ public class GradeHelper extends Activity {
 	private DefaultHttpClient client;
     private CookieStore cookieStore;
 	
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.grades_test);
-		
-		Bundle extras = getIntent().getExtras();
-		
-		// Get credentials from intent
-		username = extras.getString(KEY_USERNAME);
-		password = extras.getString(KEY_PASSWORD);
-		term = null;
+	public GradeHelper() {
+		this.username = null;
+		this.password = null;
 		
 		client = new DefaultHttpClient();
 		cookieStore = new BasicCookieStore();
 		
 		// Set the storage for the cookies
 		client.setCookieStore(cookieStore);
+		
+		// Allow circular redirects for grades page
 		client.getParams().setParameter("http.protocol.allow-circular-redirects", true);
-		
-		executeGradeRequest();
-		
 	}
 
-	private void executeGradeRequest() {
+	public GradeHelper(String username, String password) {
+		this.username = username;
+		this.password = password;
+		
+		client = new DefaultHttpClient();
+		cookieStore = new BasicCookieStore();
+		
+		// Set the storage for the cookies
+		client.setCookieStore(cookieStore);
+		
+		// Allow circular redirects for grades page
+		client.getParams().setParameter("http.protocol.allow-circular-redirects", true);
+	}
+
+	// Execute request with current parameters
+	public List<NameValuePair> executeTermRequest() throws IOException {
 		// Login using the open HttpClient and the current context
-		try {
-			login();
-		}
-		catch (IOException e) {
-			Log.e(TAG, "IOException: "+e);
-			close();
-			return;
-		}	
+		login();
 	
 		// Check if credentials succeeded
 		if (!isValidLogin()) {
-			Toast.makeText(this, R.string.login_invalid, Toast.LENGTH_LONG).show();
-			close();
-			return;
+			return null;
 		}
 		
 		// Get grades page
-		try {
-			List<NameValuePair> terms = getTerms();
-			//TODO: Pass TERMS off to Spinner view and request user to select
-			//term = SpinnerSelect(terms)
-			term = "201109";
-			List<NameValuePair> grades = getTermGrades(term);
-		}
-		catch (IOException e) {
-			Log.e(TAG, "IOException: "+e);
-			e.printStackTrace();
-			close();
-			return;
-		}
-		finally {
-			//TODO: display grades
-		}
+		List<NameValuePair> terms = getTerms();
+	
+		return terms;
 	}
 	
+	// Getters and setters
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
 	// Get login response from server using provided credentials
 	private HttpResponse login() throws IOException {
 		// GET page to set cookies
@@ -121,6 +106,8 @@ public class GradeHelper extends Activity {
 		setLoginHeaders(get);
 		logCookiesAndHeaders("GET (sent) LOGIN", cookieStore, get.getAllHeaders());
 		HttpResponse response = client.execute(get);
+		if (response != null)
+			response.getEntity().consumeContent();
 		logCookiesAndHeaders("GET (received) LOGIN", cookieStore, response.getAllHeaders());
 		
 		// POST request to login
@@ -139,11 +126,11 @@ public class GradeHelper extends Activity {
 		for (Cookie c : cookieStore.getCookies()) {
 			// Define a particular cookie which is set when a user logs in
 			if (c.getName().equalsIgnoreCase(KEY_LOGINCOOKIE)) {
-				Log.i(TAG,"Login cookie found");
+				Log.i(UVicGrades.TAG,"Login cookie found");
 				return true;
 			}
 		}
-		Log.i(TAG,"Login cookie not found");
+		Log.i(UVicGrades.TAG,"Login cookie not found");
 		return false;
 	}
 	
@@ -154,7 +141,10 @@ public class GradeHelper extends Activity {
 		HttpResponse response = client.execute(get);
 		
 		// Parse HTML for terms
-		return parseTerms(EntityUtils.toString(response.getEntity()));
+		List<NameValuePair> p = parseTerms(EntityUtils.toString(response.getEntity()));
+		if (response != null)
+			response.getEntity().consumeContent();
+		return p;
 	}
 
 	// Parse the HTML to search for available terms
@@ -172,10 +162,10 @@ public class GradeHelper extends Activity {
 	}
 	
 	// POST to the grade page and get the grades
-	private List<NameValuePair> getTermGrades(String term) throws IOException {
+	public List<NameValuePair> getTermGrades(String term) throws IOException {
 		// POST term request
 		HttpPost post = new HttpPost(grade_site);
-        setGradeInputs(post, "201109");
+        setGradeInputs(post, term);
 		setGradeHeaders(post);
 		HttpResponse response = client.execute(post);
 		
@@ -205,11 +195,9 @@ public class GradeHelper extends Activity {
 	        matcher = pattern.matcher(entry);
 	        while (matcher.find()) {
 	        	grades.add(new BasicNameValuePair(matcher.group(1)+" "+matcher.group(2), matcher.group(3)));
-	        	Log.i(TAG, grades.get(grades.size()-1).toString());
+	        	Log.i(UVicGrades.TAG, grades.get(grades.size()-1).toString());
 	        }
         }
-        TextView t = (TextView) findViewById(R.id.textTest);
-        t.setText(htmlData);
         
         return grades;
 	}
@@ -281,14 +269,14 @@ public class GradeHelper extends Activity {
 	}
 	
 	private void logCookiesAndHeaders(String note, CookieStore cookieStore, Header[] headers) {
-		Log.d(TAG,note);
-		Log.d(TAG,"Cookies: "+ (cookieStore.getCookies().isEmpty() ? "None" : ""));
+		Log.d(UVicGrades.TAG,note);
+		Log.d(UVicGrades.TAG,"Cookies: "+ (cookieStore.getCookies().isEmpty() ? "None" : ""));
 		for (Cookie c : cookieStore.getCookies()) {
-			Log.d(TAG,"- "+c.toString());
+			Log.d(UVicGrades.TAG,"- "+c.toString());
 		}
-		Log.d(TAG,"Headers:"+ (headers.length == 0 ? "None" : ""));
+		Log.d(UVicGrades.TAG,"Headers:"+ (headers.length == 0 ? "None" : ""));
 		for (Header h : headers) {
-			Log.d(TAG,"- "+h.getName()+": "+h.getValue());
+			Log.d(UVicGrades.TAG,"- "+h.getName()+": "+h.getValue());
 		}
 	}
 	
@@ -296,14 +284,8 @@ public class GradeHelper extends Activity {
 		inputs.add(new BasicNameValuePair(name, value));
 	}
 	
-	private void close() {
+	public void close() {
 		if (client != null)
 			client.getConnectionManager().shutdown();
-		finish();
 	}
-	
-	private TableRow addRow() {
-		return null;
-	}
-	
 }
