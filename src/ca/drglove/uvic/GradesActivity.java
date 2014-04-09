@@ -85,7 +85,7 @@ public class GradesActivity extends Activity {
 				tr.addView(course);
 				tr.addView(value);
 				
-				tl.addView(tr, new TableRow.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+				tl.addView(tr, new TableRow.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 			}
 		}
 	}

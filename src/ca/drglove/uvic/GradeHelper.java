@@ -25,7 +25,7 @@ import android.util.Log;
 
 public class GradeHelper {
 	
-	private static final String login_site = "https://www.uvic.ca/cas/login?service=https://www.uvic.ca/mypage/Login";
+	private static final String login_site = "https://www.uvic.ca/cas/login?service=https://www.uvic.ca";
 	private static final String grade_referer = "https://www.uvic.ca/BAN2P/bwskogrd.P_ViewTermGrde";
 	private static final String grade_site = "https://www.uvic.ca/BAN2P/bwskogrd.P_ViewGrde";
 	
@@ -180,20 +180,36 @@ public class GradeHelper {
 		String row_expr = "<TR>(.*?)</TR>";
 		Pattern pattern = Pattern.compile(row_expr, Pattern.DOTALL | Pattern.UNIX_LINES);
         Matcher matcher = pattern.matcher(htmlData);
-        while (matcher.find())
-        	if (matcher.group().contains("dddefault"))
+        while (matcher.find()) {
+        	if (matcher.group().contains("CLASS=\"default\"")) // This is all we have to go off of right now when determining if a row is relevant
         		entries.add(matcher.group(1));
+        }
 		
-        // Search each row and pick out course name, number, and grae
+        // Search each row and pick out course name and number, and grade
+        // NTL April 9, 2014: Regular expression changed. Now we have an easier table to parse
+        // Here's an example of what we're parsing
+        // (I know regexp is bad for HTML but it's not a hassle here)
+        
+        /*
+ 
+         <TD CLASS="default">PHYS 502A</TD>
+		 <TD CLASS="default">Classical Electrodynamics</TD>
+		 <TD CLASS="default">A+</TD>
+		 <TD CLASS="default">9</TD>
+		 <TD CLASS="default">  1.50</TD>
+		 <TD CLASS="default">&nbsp;</TD>
+
+         */
+        
 		List<NameValuePair> grades = new ArrayList<NameValuePair>(5);
 		String noData = "<TD[^>]*>.*?</TD>\\s+";
 		String data = "<TD[^>]*>(.*?)</TD>\\s+";
-		String grade_expr = (noData) + (data + data) + (noData + noData + noData) + (data) + (noData + noData + noData + noData + noData);
+		String grade_expr = data + noData + data + noData + noData + noData;
         pattern = Pattern.compile(grade_expr, Pattern.DOTALL | Pattern.UNIX_LINES);
         for (String entry : entries) {
 	        matcher = pattern.matcher(entry);
 	        while (matcher.find()) {
-	        	grades.add(new BasicNameValuePair(matcher.group(1)+" "+matcher.group(2), matcher.group(3)));
+	        	grades.add(new BasicNameValuePair(matcher.group(1), matcher.group(2)));
 	        	Log.i(UVicGrades.TAG, grades.get(grades.size()-1).toString());
 	        }
         }
