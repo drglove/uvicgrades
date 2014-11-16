@@ -25,7 +25,7 @@ import android.util.Log;
 
 public class GradeHelper {
 	
-	private static final String login_site = "https://www.uvic.ca/cas/login?service=https://www.uvic.ca";
+	private static final String login_site = "https://www.uvic.ca/cas/login?service=https%3a//www.uvic.ca/BAN2P/banuvic.gzcaslib.P_Service_Ticket%3ftarget=bwskogrd.P_ViewTermGrde";
 	private static final String grade_referer = "https://www.uvic.ca/BAN2P/bwskogrd.P_ViewTermGrde";
 	private static final String grade_site = "https://www.uvic.ca/BAN2P/bwskogrd.P_ViewGrde";
 	
@@ -117,6 +117,8 @@ public class GradeHelper {
 		logCookiesAndHeaders("POST (sent) LOGIN", cookieStore, post.getAllHeaders());
 		response = client.execute(post);
 		logCookiesAndHeaders("POST (received) LOGIN", cookieStore, response.getAllHeaders());
+		
+		// TODO: Add status code checking
 		
 		return response;
 	}
