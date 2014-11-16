@@ -5,5 +5,9 @@
     <string name="password">Password</string>
     <string name="username">NetLink ID</string>
     <string name="login_invalid">Invalid credentials</string>
+    <string name="feedback">Send feedback</string>
+    <string name="mail_feedback_email">nick.t.lange@gmail.com</string>
+    <string name="mail_feedback_subject">Feedback on UVic Grades</string>
+    <string name="mail_feedback_message">Hi,\n\nI would like to give you some feedback on UVic Grades:\n</string>
 
 </resources>

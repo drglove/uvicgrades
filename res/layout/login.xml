@@ -28,4 +28,19 @@
         android:layout_height="wrap_content"
         android:text="@string/login" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/feedback"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="@string/feedback" />
+
+    </LinearLayout>
+
 </LinearLayout>
